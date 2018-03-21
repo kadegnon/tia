@@ -137,8 +137,7 @@ revenir( etat(Bono,Edge,Adam,Larry, Bono, Lamp), Temps) :-
     est_dans_les_temps(TempsTrajet),
     changer_direction(Bono, Bdir),
     changer_direction(Lamp, LmpDir),
-    amener( etat(Bdir,Edge,Adam,Larry, Bdir, LmpDir) ,TempsTrajet)
-.
+    amener( etat(Bdir,Edge,Adam,Larry, Bdir, LmpDir) ,TempsTrajet).
 
 /* Edge reviens */
 revenir( etat(Bono,Edge,Adam,Larry, Edge, Lamp), Temps) :- 
@@ -146,8 +145,7 @@ revenir( etat(Bono,Edge,Adam,Larry, Edge, Lamp), Temps) :-
     est_dans_les_temps(TempsTrajet),
     changer_direction(Edge, Edir),
     changer_direction(Lamp, LmpDir),
-    amener( etat(Bono,Edir,Adam,Larry, Edir, LmpDir) ,TempsTrajet)
-    .
+    amener( etat(Bono,Edir,Adam,Larry, Edir, LmpDir) ,TempsTrajet).
     
 /* Adam reviens */
 revenir( etat(Bono,Edge,Adam,Larry, Adam, Lamp), Temps) :- 
@@ -155,8 +153,7 @@ revenir( etat(Bono,Edge,Adam,Larry, Adam, Lamp), Temps) :-
     est_dans_les_temps(TempsTrajet),
     changer_direction(Adam, Adir),
     changer_direction(Lamp, LmpDir),
-    amener( etat(Bono,Edir,Adir,Larry, Edir, LmpDir) ,TempsTrajet)
-    .
+    amener( etat(Bono,Edir,Adir,Larry, Edir, LmpDir) ,TempsTrajet).
 
 /* Larry reviens */
 revenir( etat(Bono,Edge,Adam,Larry, Edge, Lamp), Temps) :- 
@@ -164,8 +161,7 @@ revenir( etat(Bono,Edge,Adam,Larry, Edge, Lamp), Temps) :-
     est_dans_les_temps(TempsTrajet),
     changer_direction(Larry, Ldir),
     changer_direction(Lamp, LmpDir),
-    amener( etat(Bono,Edir,Adam,Larry, Ldir, LmpDir) ,TempsTrajet)
-    .
+    amener( etat(Bono,Edir,Adam,Larry, Ldir, LmpDir) ,TempsTrajet).
     
 ecrire([]).
 ecrire([H|T]) :- write(H), nl, ecrire(T).

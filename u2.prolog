@@ -3,169 +3,101 @@
 :- set_prolog_stack(global, limit(8 000 000)).  % limit term space (8Mb)
 :- set_prolog_stack(local,  limit(2 000 000)).  % limit environment space
 
+:- use_module(library(lists)).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Espace Etats : 
-% 		{(B,E,A,L, Lmp) :
-% 				B v E v A v L :- { Gauche, Droite }.
-% 				Lmp :- { gauche,droite}
-% 		}
-% 				
-% 	Bg,Eg,Ag,Lg	: {Chaque membre du groupe se trouvant à gauche du pont } 
-% 	Bd,Ed,Ad,Ld	: {Chaque membre du groupe se trouvant à droite du pont } 
-% 			  L	: Coté ou se trouve la lampe
-% 
-% 
-% Etat Initial 	: (g,g,g,g, Gauche)
-% Etat Final 	: (d,d,d,d, Droite)
-% 
-% Operateurs 	: 
-%		amener		: EE x Member x Member X TempsTotal ===> EE
-%		revenir		: EE x Member x Lampe X TempsTotal ===> EE
-%		
-%		amener( etat(Bg,Eg,Ag,Lg, Bg, Lgauche), Temps) 
-%			= etat(Bd,Eg,Ag,Lg, Ldroite) 
-%		{ Temps + duree(Bono) <= Temps }
-%		
-%		amener( etat(Bg,Eg,Ag,Lg, Bg,Eg, Lgauche), Temps) 
-%			= etat(Bd,Ed,Ag,Lg, Ldroite) 
-%		{ Temps + duree(Bono) <= Temps }
-%		
-%		amener( etat(Bg,Eg,Ag,Lg, Bg, Lgauche), Temps) 
-%			= etat(Bd,Eg,Ag,Lg, Ldroite) 
-%		{ Temps + duree(Bono) <= Temps }
-%				
-%		amener( etat(Bg,Eg,Ag,Lg, Bg, Lgauche), Temps) 
-%			= etat(Bd,Eg,Ag,Lg, Ldroite) 
-%		{ Temps + duree(Bono) <= Temps }
-%		
-%		
-%		revenir( etat(Bd,Edge,Adam,Larry, Bd, Ldroite), Temps) 
-%			= etat(Bd,Edge,Adam,Larry, Ldroite) 
-%		{ Temps + duree(Bono) <= Temps }
-%		
-%		
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-temps(bono, 1).
-temps(edge, 2).
-temps(adam, 5).
-temps(larry,10).
+time(bono, 	1).
+time(edge, 	2).
+time(adam, 	5).
+time(larry, 10).
 
-min(T1,T2,T1) :- T1 > T2,!.
-min(T1,T2,T2) :- T1 =< T2.
+% on_time(+U2Member, +CurrentTime, -TimeForMove).
+on_time(U1, T, Tt) :- 
+    time(U1, TU1), 
+    Tt is T + TU1, Tt =< 17.
 
-temps_min(U1,U2,U,T) :- temps(U1,T1),temps(U2,T2), min(T1,T2,T), temps(U,T).
-temps_min(U1,U2,T) :- temps_min(U1,U2,_,T).
-
-est_dans_les_temps(TempsTrajet) :- TempsTrajet =< 17.
-
-changer_direction(gauche,droite).
-changer_direction(droite,gauche).
-
-
- /** Bono et Edge traversent ensemble **/
-amener(etat(Bono,Edge,Adam,Larry, Bono, Lamp), Temps) :- 
-    temps_min(bono,edge, TempsTrav),
-    TempsTrajet is Temps + TempsTrav,
-    est_dans_les_temps(TempsTrajet),
-    changer_direction(Bono, Bdir),
-    changer_direction(Edge, Edir),
-    changer_direction(Lamp, LmpDir),
-    revenir( etat(Bdir,Edir,Adam,Larry, Bdir, LmpDir) ,TempsTrajet).
-
- /** Bono et Adam traversent ensemble **/
-amener(etat(Bono,Edge,Adam,Larry, Bono, Lamp), Temps) :- 
-    temps_min(bono,adam, TempsTrav),
-    TempsTrajet is Temps + TempsTrav,
-    est_dans_les_temps(TempsTrajet),
-    changer_direction(Bono, Bdir),
-    changer_direction(Adam, Adir),
-    changer_direction(Lamp, LmpDir),
-    revenir( etat(Bdir,Edge,Adir,Larry, Bdir, LmpDir) ,TempsTrajet).
-
- /** Bono et Larry traversent ensemble **/
-amener(etat(Bono,Edge,Adam,Larry, Bono, Lamp), Temps) :- 
-    temps_min(bono,larry, TempsTrav),
-    TempsTrajet is Temps + TempsTrav,
-    est_dans_les_temps(TempsTrajet),
-    changer_direction(Bono, Bdir),
-    changer_direction(Larry, Ldir),
-    changer_direction(Lamp, LmpDir),
-    revenir( etat(Bdir,Edge,Adam,Ldir, Bdir, LmpDir) ,TempsTrajet).
-
- /** Edge et Adam traversent ensemble **/
-amener(etat(Bono,Edge,Adam,Larry, Edge, Lamp), Temps) :- 
-    temps_min(edge,adam, TempsTrav),
-    TempsTrajet is Temps + TempsTrav,
-    est_dans_les_temps(TempsTrajet),
-    changer_direction(Edge, Edir),
-    changer_direction(Adam, Adir),
-    changer_direction(Lamp, LmpDir),
-    revenir( etat(Bono,Edir,Adam,Larry, Edir, LmpDir) ,TempsTrajet).
-
- /** Edge et Larry traversent ensemble **/
-amener(etat(Bono,Edge,Adam,Larry, Edge, Lamp), Temps) :- 
-    temps_min(edge,larry, TempsTrav),
-    TempsTrajet is Temps + TempsTrav,
-    est_dans_les_temps(TempsTrajet),
-    changer_direction(Edge, Edir),
-    changer_direction(Larry, Ldir),
-    changer_direction(Lamp, LmpDir),
-    revenir( etat(Bono,Edir,Adam,Ldir, Edir, LmpDir) ,TempsTrajet).
-
- /** Adam et Larry traversent ensemble **/
-amener(etat(Bono,Edge,Adam,Larry, Adam, Lamp), Temps) :- 
-    temps_min(larry,adam, TempsTrav),
-    TempsTrajet is Temps + TempsTrav,
-    est_dans_les_temps(TempsTrajet),
-    changer_direction(Larry, Ldir),
-    changer_direction(Adam, Adir),
-    changer_direction(Lamp, LmpDir),
-    revenir( etat(Bono,Edir,Adam,Larry, Edir, LmpDir) ,TempsTrajet).
+% on_time(+U2Member, +U2Member, +CurrentTime, -TimeForMove).
+on_time(U1, U2, T, Tt) :-
+    max_time(U1,U2, Tmax),
+    Tt is T + Tmax,
+    Tt =< 17.
 
 
+% max_time(+U2Member, +U2Member, -MaxTime).
+max_time(U1, U2, T) :- 
+    time(U1, TU1), time(U2, TU2), 
+    (TU1 =< TU2
+    	-> T = TU2
+    	;  T = TU1
+    ).
 
 
+move(U1, Members, RestMembers) :-
+    member(U1, Members), delete(Members, U1, RestMembers).
+
+move(U1, U2, Members, RestMembers) :-
+    member(U1, Members), delete(Members, U1, Rest),
+	member(U2, Rest), delete(Rest, U2, RestMembers).
 
 
+%state( (left_side_members, right_side_members), lamp_side, Totaltime), Transition_made).
+
+state((LSM, RSB), l, T, [crossing(U1,U2) | RestMembers]) :- 
+    move(U1, U2, LSM, LSMRestMembers),
+    on_time(U1, U2, T, Tt),
+    NewRSBMembers = [U1,U2|RSB],
+    state((LSMRestMembers, NewRSBMembers), r, Tt, RestMembers).
+
+state((LSM, RSB), l, T, [crossing(U1) | RestMembers]) :- 
+    move(U1, LSM, LSMRest),
+    on_time(U1, T, Tt),
+    RSBWithCrossedMember = [U1|RSB],
+    state((LSMRest, RSBWithCrossedMember), r, Tt, RestMembers).
+
+state((LSM, RSB), r, T, [back(U1) | RestMembers]) :- 
+    move(U1, RSB, RSBRest),
+    on_time(U1, T, Tt),
+    LSMWithCrossedMember = [U1|LSM],
+    state((LSMWithCrossedMember, RSBRest), l, Tt, RestMembers).
+
+state((LSM, RSB), r, T, [back(U1,U2) | RestMembers]) :- 
+    move(U1, U2, RSB, RSBRest),
+    on_time(U1, U2, T, Tt),
+    NewLSMMembers = [U1,U2|LSM],
+    state((NewLSMMembers, RSBRest), l, Tt, RestMembers).
+
+%% Final State : U2 members on the right side with the lamp.
+state(([], RSB), r, 17, []) :- 
+    member(bono, RSB), member(adam, RSB),
+    member(edge, RSB), member(larry, RSB).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Main predicat to launch the search for all transitions
+%
+
+u2(Trans) :- state(([bono,edge,adam,larry],[]), l , 0 , Trans).
+is_solution :- Trans = [
+               		crossing(edge, bono), 
+                    back(bono), 
+                    crossing(larry, adam), 
+                    back(edge), 
+                    crossing(edge, bono)
+              ], u2(Trans), !.
+
+solution :- 
+    u2(L), 
+    writeln("***"), 
+    write_moves(L).
 
 
-/* Bono reviens tout-seul */
-revenir( etat(Bono,Edge,Adam,Larry, Bono, Lamp), Temps) :- 
-    temps(bono,Tb), TempsTrajet is Temps + Tb,
-    est_dans_les_temps(TempsTrajet),
-    changer_direction(Bono, Bdir),
-    changer_direction(Lamp, LmpDir),
-    amener( etat(Bdir,Edge,Adam,Larry, Bdir, LmpDir) ,TempsTrajet).
-
-/* Edge reviens */
-revenir( etat(Bono,Edge,Adam,Larry, Edge, Lamp), Temps) :- 
-    temps(edge,Te), TempsTrajet is Temps + Te,
-    est_dans_les_temps(TempsTrajet),
-    changer_direction(Edge, Edir),
-    changer_direction(Lamp, LmpDir),
-    amener( etat(Bono,Edir,Adam,Larry, Edir, LmpDir) ,TempsTrajet).
-    
-/* Adam reviens */
-revenir( etat(Bono,Edge,Adam,Larry, Adam, Lamp), Temps) :- 
-    temps(adam,Ta), TempsTrajet is Temps + Ta,
-    est_dans_les_temps(TempsTrajet),
-    changer_direction(Adam, Adir),
-    changer_direction(Lamp, LmpDir),
-    amener( etat(Bono,Edir,Adir,Larry, Edir, LmpDir) ,TempsTrajet).
-
-/* Larry reviens */
-revenir( etat(Bono,Edge,Adam,Larry, Edge, Lamp), Temps) :- 
-    temps(larry,Te), TempsTrajet is Temps + Te,
-    est_dans_les_temps(TempsTrajet),
-    changer_direction(Larry, Ldir),
-    changer_direction(Lamp, LmpDir),
-    amener( etat(Bono,Edir,Adam,Larry, Ldir, LmpDir) ,TempsTrajet).
-    
-ecrire([]).
-ecrire([H|T]) :- write(H), nl, ecrire(T).
-
-/** <examples> Your example queries go here, e.g.
-?- member(X, [cat, mouse]).
-*/
+write_moves([crossing(U1,U2) |T ]) :- 
+    format("~s crossing with ~s~n", [U1, U2]), write_moves(T).
+write_moves([crossing(U1) |T ]) :- 
+    format("~s crossing ~n", [U1]), write_moves(T).
+write_moves([back(U1) |T ]) :- 
+    format("~s back~n", U1), write_moves(T).
+write_moves([back(U1,U2) |T ]) :- 
+    format("~w back with ~s~n", [U1, U2]), write_moves(T).
+write_moves([ _ |[]]) :- writeln('*_END_*').

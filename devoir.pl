@@ -1,4 +1,3 @@
-:- use_module(library(lists)).
 :- use_module(library(clpfd)).
 
 
@@ -45,7 +44,7 @@ le domaine de celle-ci comme 1 . . . Nb ;
  */
 produire_lassoc([], [], _).
 produire_lassoc([pers, R], Nb, Lassoc) :-
-    Place_Nb in 1..Nb,
+    Place_Nb ins 1..Nb,
     length(Lassoc,L),
     Place_Nb + L #<= Nb,
     
